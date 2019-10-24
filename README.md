@@ -7,7 +7,7 @@
 
 ![](images/2.png)
 
-为了过滤掉这种情况，借鉴(copy) 了 tesseract 的实现，有了这个工具
+为了过滤掉这种情况，借鉴(copy) 了 tesseract 的实现
 
 ## 使用方法
 
