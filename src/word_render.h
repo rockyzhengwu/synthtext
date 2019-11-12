@@ -28,6 +28,13 @@ public:
           std::vector<std::string> &words,
           std::vector<PangoRectangle> &positions);
 
+  void render_line_aug(
+      const std::string &content,
+      Pix *&pix,
+      const std::string &background_image,
+      std::vector<std::string> &words,
+      std::vector<PangoRectangle> &positions);
+
   void render_line_background(
           const std::string &content,
           const std::string &font,
@@ -38,24 +45,24 @@ public:
           );
 
 
-  void render_with_background(
+  void render_word_with_background(
           const std::string &word,
           const std::string &font,
           const std::string &background_image,
           Pix *&pix);
 
-  void render_no_background(
+  void render_word_no_background(
           const std::string &word,
           const std::string &font,
           Pix *& pix);
   void render_line_all_fonts(const std::string &content, const std::string &out_image_dir, int font_num);
 
-  void render_all_fonts(const std::string & word, const std::string & out_image_dir);
+  void render_word_all_fonts(const std::string & word, const std::string & out_image_dir);
 
   void crop_text_image(cairo_surface_t *surface, PangoLayout *layout, Pix *&pix, double start_x=0, double start_y=0);
 
   void crop_line_image(cairo_surface_t *surface, PangoLayout *layout, Pix *&pix,
-          std::vector<std::string> &words, std::vector<PangoRectangle> &positions, double start_x = 0, double start_y=0);
+          std::vector<std::string> &words, std::vector<PangoRectangle> &positions, double start_x = 0, double start_y=0, double angle=0.0);
 
 
 private:

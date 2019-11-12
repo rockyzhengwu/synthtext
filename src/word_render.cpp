@@ -21,6 +21,40 @@ double get_random_value() {
   return v;
 }
 
+void WordRender::render_line_aug(const std::string &content, Pix *&pix, const std::string &background_image,
+                                 std::vector<std::string> &words, std::vector<PangoRectangle> &positions) {
+
+  cairo_surface_t *surface;
+  cairo_t *cr;
+
+  surface = cairo_image_surface_create_from_png(background_image.c_str());
+  int w = cairo_image_surface_get_width(surface);
+  int h = cairo_image_surface_get_height(surface);
+  cr = cairo_create(surface);
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+  int i = 0;
+
+  for (i = 0; i < content.length(); i++)
+  {
+    int width, height;
+    double angle = 2;
+    double red;
+
+    cairo_save (cr);
+    // set cr 计算下一个字的位置,move to
+    pango_cairo_update_layout (cr, layout);
+
+    pango_layout_get_size (layout, &width, &height);
+
+
+    pango_cairo_show_layout (cr, layout);
+
+    cairo_restore (cr);
+  }
+
+}
+
+
 void WordRender::render_line_no_background(const std::string &content, const std::string &font,
                                            Pix *&pix, std::vector<std::string> &words,
                                            std::vector<PangoRectangle> &positions) {
@@ -75,18 +109,28 @@ void WordRender::render_line_background(const std::string &content, const std::s
 
   double start_x = 0;
   double start_y = 0;
+  double angle = 0.0;
+  if (get_random_value() < 0.5){
+    angle = get_random_value() ;
+    if(get_random_value() < 0.5){
+      angle = angle * -1;
+      start_y = h - 32;
+    }
+    angle = 4 * angle * G_PI / 180;
+  }
   cairo_move_to(cr, start_x, start_y);
+  cairo_rotate(cr, angle);
   pango_layout_set_text(layout, content.c_str(), -1);
   pango_cairo_show_layout(cr, layout);
 
-  crop_line_image(surface, layout, pix, words, positions, start_x, start_y);
+  crop_line_image(surface, layout, pix, words, positions, start_x, start_y, angle);
   cairo_destroy(cr);
   cairo_surface_destroy(surface);
 }
 
 void WordRender::crop_line_image(cairo_surface_t *surface, PangoLayout *layout, Pix *&pix,
                                  std::vector<std::string> &words, std::vector<PangoRectangle> &positions,
-                                 double start_x, double start_y) {
+                                 double start_x, double start_y, double angle) {
   const char *text = pango_layout_get_text(layout);
   PangoLayoutIter *cluster_iter = pango_layout_get_iter(layout);
   std::vector<int> cluster_start_indices;
@@ -143,6 +187,16 @@ void WordRender::crop_line_image(cairo_surface_t *surface, PangoLayout *layout, 
   }
   PangoRectangle lastrect = positions[positions.size()-1];
   int total_width = lastrect.x + lastrect.width ;
+
+  if (angle < 0){
+    start_y = (height - 32) - (-1 *  total_width * tan(angle)) ;
+    total_height = 32 +(-1 * total_width * tan(angle));
+    total_width += 32;
+//    start_y += total_width * tan(angle);
+  } else{
+    total_height = lastrect.y + lastrect.height;
+    total_height += total_width * tan(angle);
+  }
 
   BOX *box = boxCreate(start_x, start_y, total_width, total_height);
   pix = pixClipRectangle(image_pix, box, NULL);
@@ -219,7 +273,7 @@ void WordRender::render_line_all_fonts(const std::string &content, const std::st
   }
 }
 
-void WordRender::render_all_fonts(const std::string &word, const std::string &out_image_dir) {
+void WordRender::render_word_all_fonts(const std::string &word, const std::string &out_image_dir) {
   Pix *pix = nullptr;
   for (std::string font: fonts_) {
     PangoFontInfo pango_font_info(font);
@@ -227,13 +281,13 @@ void WordRender::render_all_fonts(const std::string &word, const std::string &ou
       continue;
     }
     if (background_images_.size() == 0 or image_background_rate_ == 0) {
-      render_no_background(word, font, pix);
+      render_word_no_background(word, font, pix);
     } else {
       if (get_random_value() < image_background_rate_) {
         int index = (int) (get_random_value() * (background_images_.size() - 1));
-        render_with_background(word, font, background_images_[index], pix);
+        render_word_with_background(word, font, background_images_[index], pix);
       } else {
-        render_no_background(word, font, pix);
+        render_word_no_background(word, font, pix);
       }
     }
     if (pix != nullptr) {
@@ -248,7 +302,7 @@ void WordRender::render_all_fonts(const std::string &word, const std::string &ou
   }
 }
 
-void WordRender::render_no_background(const std::string &word, const std::string &font, Pix *&pix) {
+void WordRender::render_word_no_background(const std::string &word, const std::string &font, Pix *&pix) {
   // init cairo
   cairo_surface_t *surface;
   cairo_t *cr;
@@ -276,7 +330,7 @@ void WordRender::render_no_background(const std::string &word, const std::string
   cairo_surface_destroy(surface);
 }
 
-void WordRender::render_with_background(const std::string &word, const std::string &font,
+void WordRender::render_word_with_background(const std::string &word, const std::string &font,
                                         const std::string &background_image,
                                         Pix *&pix) {
   // init cairo
