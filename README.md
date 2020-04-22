@@ -9,6 +9,26 @@
 
 为了过滤掉这种情况，借鉴(copy) 了 tesseract 的实现
 
+## 依赖安装
+```
+
+sudo apt-get install autoconf automake libtool
+sudo apt-get install pkg-config
+sudo apt-get install libpng-dev
+sudo apt-get install libjpeg8-dev
+sudo apt-get install libtiff5-dev
+sudo apt-get install zlib1g-dev
+
+sudo apt-get install libicu-dev
+sudo apt-get install libpango1.0-dev
+sudo apt-get install libcairo2-dev
+
+sudo apt-get install libleptonica-dev
+sudo apt-get install libboost-all-dev
+
+
+```
+
 ## 使用方法
 
 ```$xslt
